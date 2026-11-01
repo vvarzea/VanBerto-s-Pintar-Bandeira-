@@ -41,6 +41,12 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   border:none;border-radius:20px;padding:6px 12px;cursor:pointer;white-space:nowrap;
   touch-action:manipulation;box-shadow:0 2px 8px rgba(232,146,10,.35);}
 
+#btnFS{font-family:'Baloo 2',cursive;font-size:var(--fs-sm);background:#fff;color:var(--ink);
+  border:2px solid var(--border);border-radius:20px;padding:4px 10px;cursor:pointer;white-space:nowrap;
+  touch-action:manipulation;box-shadow:0 2px 6px var(--shadow);line-height:1.2;flex-shrink:0;}
+#btnFS:active{transform:scale(.94);}
+#hudBtns{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+
 /* ── PICKER ── */
 #pickerOverlay{display:none;position:fixed;inset:0;z-index:25;background:rgba(28,26,46,.25);backdrop-filter:blur(2px);}
 #pickerOverlay.open{display:block;}
@@ -292,7 +298,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <div id="hudProgBar"><div id="hudProgFill"></div></div>
       <span id="hudProgTxt">0/0</span>
     </div>
-    <button id="btnPicker" onclick="togglePicker()">🌍 Bandeiras</button>
+    <div id="hudBtns"><button id="btnFS" onclick="toggleFullscreen()" title="Ecrã inteiro" aria-label="Ecrã inteiro">⛶</button><button id="btnPicker" onclick="togglePicker()">🌍 Bandeiras</button></div>
   </div>
 
   <!-- PICKER -->
@@ -2170,6 +2176,30 @@ function confetti(){
     document.body.appendChild(d);setTimeout(()=>d.remove(),4000);
   }
 }
+
+// ── ECRÃ INTEIRO ─────────────────────────────────────────
+function fsElement(){return document.fullscreenElement||document.webkitFullscreenElement||null;}
+function fsSupported(){const d=document.documentElement;return !!(d.requestFullscreen||d.webkitRequestFullscreen);}
+function toggleFullscreen(){
+  const d=document.documentElement;
+  if(!fsElement()){
+    const f=d.requestFullscreen||d.webkitRequestFullscreen;
+    if(f){const r=f.call(d);if(r&&r.catch)r.catch(()=>{});}
+  } else {
+    const x=document.exitFullscreen||document.webkitExitFullscreen;
+    if(x){const r=x.call(document);if(r&&r.catch)r.catch(()=>{});}
+  }
+}
+function updateFSBtn(){
+  const b=document.getElementById('btnFS');if(!b)return;
+  const on=!!fsElement();
+  b.textContent=on?'✕':'⛶';
+  b.title=on?'Sair do ecrã inteiro':'Ecrã inteiro';
+  b.setAttribute('aria-label',b.title);
+}
+document.addEventListener('fullscreenchange',updateFSBtn);
+document.addEventListener('webkitfullscreenchange',updateFSBtn);
+if(!fsSupported())document.getElementById('btnFS').style.display='none';
 
 // ── INIT ──────────────────────────────────────────────────
 preloadFlags();loadFlag(0);
